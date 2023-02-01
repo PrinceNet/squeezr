@@ -1,0 +1,30 @@
+{
+  "name": "squeezr",
+  "version": "0.1.0",
+  "description": "cli tool for convert and minify images",
+  "main": "index.js",
+  "bin": {
+    "squeezr": "./index.js"
+  },
+  "scripts": {
+    "test": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PrinceNet/squeezr.git"
+  },
+  "keywords": [
+    "image",
+    "compress",
+    "tiny",
+    "minify",
+    "convert"
+  ],
+  "author": "Doron Mor",
+  "license": "Apache License 2.0",
+  "dependencies": {
+    "cli-progress": "^3.11.2",
+    "p-queue": "^7.3.0",
+    "sharp": "^0.31.3"
+  }
+}
