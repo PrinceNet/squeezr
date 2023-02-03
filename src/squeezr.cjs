@@ -34,6 +34,101 @@ class Squeezr {
     return _files.map((file) => file.split("//").join("/"));
   }
 
+  async #getFolderSize(dir) {
+    let totalSize = 0;
+
+    const files = await fs.promises.readdir(dir);
+
+    for (const file of files) {
+      const filePath = path.join(dir, file);
+      const stat = await fs.promises.lstat(filePath);
+
+      if (stat.isDirectory()) {
+        totalSize += stat.size;
+        totalSize += await this.#getFolderSize(filePath);
+      } else {
+        totalSize += stat.size;
+      }
+    }
+
+    return totalSize;
+  }
+
+  #formatBytes(bytes) {
+    if (bytes < 1024) {
+      return bytes + " Bytes";
+    } else if (bytes < 1048576) {
+      return (bytes / 1024).toFixed(2) + " KB";
+    } else if (bytes < 1073741824) {
+      return (bytes / 1048576).toFixed(2) + " MB";
+    } else {
+      return (bytes / 1073741824).toFixed(2) + " GB";
+    }
+  }
+
+  #showResults(_options) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const srcBytes = await this.#getFolderSize(_options.srcFolder);
+        const targetBytes = await this.#getFolderSize(_options.targetFolder);
+        const saved = `saved ${((1 - targetBytes / srcBytes) * 100).toFixed(2)} %`;
+        const msg = `${saved} (src: ${this.#formatBytes(srcBytes)}, target: ${this.#formatBytes(targetBytes)})`;
+
+        console.log(`squeezr:: ${msg}`);
+
+        resolve();
+      } catch (error) {
+        reject(`squeezr:: ${error}`);
+      }
+    });
+  }
+
+  #minifyPngImage(_options = {}) {
+    const formatParams = { effort: 10, quality: 100, compressionLevel: 9, adaptiveFiltering: true };
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        await sharp(_options.srcPath).png(formatParams).toFile(_options.targetPath);
+
+        resolve();
+      } catch (error) {
+        reject(`squeezr:: ${error}`);
+      }
+    });
+  }
+
+  #minifyJpgImage(_options = {}) {
+    const formatParams = { mozjpeg: true };
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        await sharp(_options.srcPath).jpeg(formatParams).toFile(_options.targetPath);
+
+        resolve();
+      } catch (error) {
+        reject(`squeezr:: ${error}`);
+      }
+    });
+  }
+
+  #minifyWebpImage(_options = {}) {
+    const formatParams = { effort: 6, quality: 75 };
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        await sharp(_options.srcPath, {
+          animated: false,
+        })
+          .webp(formatParams)
+          .toFile(_options.targetPath);
+
+        resolve();
+      } catch (error) {
+        reject(`squeezr:: ${error}`);
+      }
+    });
+  }
+
   #minifySingleImage(_options = {}) {
     if (!_options.srcPath) {
       throw new Error(`squeezr:: no 'srcPath' provided !`);
@@ -55,20 +150,23 @@ class Squeezr {
             fs.mkdirSync(_options.targetPath, { recursive: true });
           }
 
+          const _imgTargetPath = `${_options.targetPath}/${_targetFileName}${_targetExt}`;
+
           if (_targetExt === ".png") {
-            await sharp(_options.srcPath)
-              .png({ effort: 10, quality: 100, compressionLevel: 9, adaptiveFiltering: true })
-              .toFile(`${_options.targetPath}/${_targetFileName}${_targetExt}`);
+            await this.#minifyPngImage({
+              srcPath: _options.srcPath,
+              targetPath: _imgTargetPath,
+            });
           } else if (_targetExt === ".jpg" || _targetExt === ".jpeg") {
-            await sharp(_options.srcPath)
-              .jpeg({ mozjpeg: true })
-              .toFile(`${_options.targetPath}/${_targetFileName}${_targetExt}`);
+            await this.#minifyJpgImage({
+              srcPath: _options.srcPath,
+              targetPath: _imgTargetPath,
+            });
           } else if (_targetExt === ".webp") {
-            await sharp(_options.srcPath, {
-              animated: false,
-            })
-              .webp({ effort: 6, quality: 75 })
-              .toFile(`${_options.targetPath}/${_targetFileName}${_targetExt}`);
+            await this.#minifyWebpImage({
+              srcPath: _options.srcPath,
+              targetPath: _imgTargetPath,
+            });
           }
 
           resolve();
@@ -102,15 +200,15 @@ class Squeezr {
 
     if (!_options.format) {
       _options.format = null;
-      console.warn(`squeezr:: no 'format' provided. uses the source file format dynamically`);
+      console.warn(`squeezr:: no 'format' provided, uses the source file format dynamically`);
     }
 
     const _activePath = _options.activePath ? `${_options.targetFolder}/${_options.activePath}` : _options.targetFolder;
 
-    console.log(`squeezr:: Source folder: ${_options.srcFolder}`);
-    console.log(`squeezr:: Target folder: ${_options.targetFolder}`);
-    console.log(`squeezr:: Active path: ${_activePath}`);
-    console.log(`squeezr:: Is optimum: `, _options.isOptimum);
+    console.log(`squeezr:: source folder: ${_options.srcFolder}`);
+    console.log(`squeezr:: target folder: ${_options.targetFolder}`);
+    console.log(`squeezr:: active path: ${_activePath}`);
+    console.log(`squeezr:: is optimum: `, _options.isOptimum);
 
     return new Promise(async (resolve, reject) => {
       try {
@@ -152,6 +250,12 @@ class Squeezr {
 
             if (_isDoneAll) {
               _bar.stop();
+
+              await this.#showResults({
+                srcFolder: _options.srcFolder,
+                targetFolder: _options.targetFolder,
+              });
+
               console.timeEnd("squeezr:: minify complete");
 
               resolve();
