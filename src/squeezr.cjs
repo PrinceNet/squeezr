@@ -84,7 +84,7 @@ class Squeezr {
   }
 
   #minifyPngImage(_options = {}) {
-    const formatParams = { effort: 10, quality: 100, compressionLevel: 9, adaptiveFiltering: true };
+    const formatParams = { effort: 10, palette: true, quality: 100 };
 
     return new Promise(async (resolve, reject) => {
       try {
