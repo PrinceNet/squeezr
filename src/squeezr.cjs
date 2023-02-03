@@ -27,12 +27,6 @@ class Squeezr {
               _files.push(name);
             }
           }
-
-          if (name.indexOf(_ext) > 0) {
-            _files.push(name);
-          }
-        } else {
-          _files.push(name);
         }
       }
     }
