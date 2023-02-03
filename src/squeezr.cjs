@@ -112,15 +112,11 @@ class Squeezr {
   }
 
   #minifyWebpImage(_options = {}) {
-    const formatParams = { effort: 6, quality: 75 };
+    const formatParams = { effort: 5, quality: 50, nearLossless: true };
 
     return new Promise(async (resolve, reject) => {
       try {
-        await sharp(_options.srcPath, {
-          animated: false,
-        })
-          .webp(formatParams)
-          .toFile(_options.targetPath);
+        await sharp(_options.srcPath).webp(formatParams).toFile(_options.targetPath);
 
         resolve();
       } catch (error) {
