@@ -2,6 +2,8 @@
 
 squeezr is a node CLI tool for convert and minify images written in Javascript.
 
+Currently support the following formats: JPEG, PNG, WebP and AVIF.
+
 ## Installation
 
 Use the package manager [npm](https://www.npmjs.com) to install squeezr.
