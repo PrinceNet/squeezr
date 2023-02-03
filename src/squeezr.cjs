@@ -188,7 +188,6 @@ class Squeezr {
     console.time("squeezr:: minify complete");
 
     _options.activePath = _options.activePath || "";
-    _options.isOptimum = !!_options.isOptimum;
 
     if (!_options.srcFolder) {
       throw new Error(`squeezr:: no 'srcFolder' provided !`);
@@ -208,7 +207,6 @@ class Squeezr {
     console.log(`squeezr:: source folder: ${_options.srcFolder}`);
     console.log(`squeezr:: target folder: ${_options.targetFolder}`);
     console.log(`squeezr:: active path: ${_activePath}`);
-    console.log(`squeezr:: is optimum: `, _options.isOptimum);
 
     return new Promise(async (resolve, reject) => {
       try {
@@ -239,7 +237,6 @@ class Squeezr {
               this.#minifySingleImage({
                 srcPath: _srcFilePath,
                 targetPath: _targetFilePath,
-                isOptimum: _options.isOptimum,
                 format: _options.format,
               })
             );

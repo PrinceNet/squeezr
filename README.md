@@ -18,12 +18,6 @@ Simple as that
 squeezr --srcFolder="/absolute_path/in" --targetFolder="/absolute_path/out"
 ```
 
-You can even use optimal lossless compression by passing `--isOptimum`
-
-```shell
-squeezr --srcFolder="/absolute_path/in" --targetFolder="/absolute_path/out" --isOptimum
-```
-
 Or if you want a portion of files to be compressed you can pass `--activePath` to work as a subpath
 
 ```shell
