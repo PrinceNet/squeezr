@@ -98,7 +98,7 @@ class Squeezr {
   }
 
   #minifyJpgImage(_options = {}) {
-    const formatParams = { mozjpeg: true };
+    const formatParams = { mozjpeg: true, quantisationTable: 8 };
 
     return new Promise(async (resolve, reject) => {
       try {
