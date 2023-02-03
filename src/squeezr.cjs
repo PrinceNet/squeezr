@@ -129,6 +129,20 @@ class Squeezr {
     });
   }
 
+  #minifyAvifImage(_options = {}) {
+    const formatParams = { effort: 6, quality: 75, chromaSubsampling: "4:2:0" };
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        await sharp(_options.srcPath).avif(formatParams).toFile(_options.targetPath);
+
+        resolve();
+      } catch (error) {
+        reject(`squeezr:: ${error}`);
+      }
+    });
+  }
+
   #minifySingleImage(_options = {}) {
     if (!_options.srcPath) {
       throw new Error(`squeezr:: no 'srcPath' provided !`);
@@ -164,6 +178,11 @@ class Squeezr {
             });
           } else if (_targetExt === ".webp") {
             await this.#minifyWebpImage({
+              srcPath: _options.srcPath,
+              targetPath: _imgTargetPath,
+            });
+          } else if (_targetExt === ".avif") {
+            await this.#minifyAvifImage({
               srcPath: _options.srcPath,
               targetPath: _imgTargetPath,
             });
@@ -207,6 +226,7 @@ class Squeezr {
     console.log(`squeezr:: source folder: ${_options.srcFolder}`);
     console.log(`squeezr:: target folder: ${_options.targetFolder}`);
     console.log(`squeezr:: active path: ${_activePath}`);
+    console.log(`squeezr:: format: ${_options.format === null ? "dynamic" : _options.format}`);
 
     return new Promise(async (resolve, reject) => {
       try {
