@@ -1,7 +1,7 @@
-const fs = require("fs");
-const path = require("path");
-const sharp = require("sharp");
-const cliProgress = require("cli-progress");
+const fs = require('fs');
+const path = require('path');
+const sharp = require('sharp');
+const cliProgress = require('cli-progress');
 
 class Squeezr {
   #getFilesByFileExt(dir, _ext, _files) {
@@ -15,7 +15,7 @@ class Squeezr {
       if (fs.statSync(name).isDirectory()) {
         this.#getFilesByFileExt(name, _ext, _files);
       } else {
-        if (typeof _ext === "string") {
+        if (typeof _ext === 'string') {
           if (name.indexOf(_ext) > 0) {
             _files.push(name);
           }
@@ -31,7 +31,7 @@ class Squeezr {
       }
     }
 
-    return _files.map((file) => file.split("//").join("/"));
+    return _files.map((file) => file.split('//').join('/'));
   }
 
   async #getFolderSize(dir) {
@@ -56,13 +56,13 @@ class Squeezr {
 
   #formatBytes(bytes) {
     if (bytes < 1024) {
-      return bytes + " Bytes";
+      return bytes + ' Bytes';
     } else if (bytes < 1048576) {
-      return (bytes / 1024).toFixed(2) + " KB";
+      return (bytes / 1024).toFixed(2) + ' KB';
     } else if (bytes < 1073741824) {
-      return (bytes / 1048576).toFixed(2) + " MB";
+      return (bytes / 1048576).toFixed(2) + ' MB';
     } else {
-      return (bytes / 1073741824).toFixed(2) + " GB";
+      return (bytes / 1073741824).toFixed(2) + ' GB';
     }
   }
 
@@ -126,7 +126,7 @@ class Squeezr {
   }
 
   #minifyAvifImage(_options = {}) {
-    const formatParams = { effort: 6, quality: 75, chromaSubsampling: "4:2:0" };
+    const formatParams = { effort: 6, quality: 75, chromaSubsampling: '4:2:0' };
 
     return new Promise(async (resolve, reject) => {
       try {
@@ -162,22 +162,22 @@ class Squeezr {
 
           const _imgTargetPath = `${_options.targetPath}/${_targetFileName}${_targetExt}`;
 
-          if (_targetExt === ".png") {
+          if (_targetExt === '.png') {
             await this.#minifyPngImage({
               srcPath: _options.srcPath,
               targetPath: _imgTargetPath,
             });
-          } else if (_targetExt === ".jpg" || _targetExt === ".jpeg") {
+          } else if (_targetExt === '.jpg' || _targetExt === '.jpeg') {
             await this.#minifyJpgImage({
               srcPath: _options.srcPath,
               targetPath: _imgTargetPath,
             });
-          } else if (_targetExt === ".webp") {
+          } else if (_targetExt === '.webp') {
             await this.#minifyWebpImage({
               srcPath: _options.srcPath,
               targetPath: _imgTargetPath,
             });
-          } else if (_targetExt === ".avif") {
+          } else if (_targetExt === '.avif') {
             await this.#minifyAvifImage({
               srcPath: _options.srcPath,
               targetPath: _imgTargetPath,
@@ -200,9 +200,9 @@ class Squeezr {
   }
 
   minify(_options = {}) {
-    console.time("squeezr:: minify complete");
+    console.time('squeezr:: minify complete');
 
-    _options.activePath = _options.activePath || "";
+    _options.activePath = _options.activePath || '';
 
     if (!_options.srcFolder) {
       throw new Error(`squeezr:: no 'srcFolder' provided !`);
@@ -222,21 +222,28 @@ class Squeezr {
     console.log(`squeezr:: source folder: ${_options.srcFolder}`);
     console.log(`squeezr:: target folder: ${_options.targetFolder}`);
     console.log(`squeezr:: active path: ${_activePath}`);
-    console.log(`squeezr:: format: ${_options.format === null ? "dynamic" : _options.format}`);
+    console.log(`squeezr:: format: ${_options.format === null ? 'dynamic' : _options.format}`);
 
     return new Promise(async (resolve, reject) => {
       try {
-        const _validFileExt = [".png", ".jpg", ".jpeg"];
+        const _validFileExt = ['.png', '.jpg', '.jpeg'];
         const _imgFiles = this.#getFilesByFileExt(`${_options.srcFolder}/${_options.activePath}`, _validFileExt);
+
+        if (!_imgFiles.length) {
+          console.log(`squeezr:: no files found!`);
+
+          return resolve();
+        }
+
         const _bar = new cliProgress.SingleBar(
-          { format: "squeezr:: minifying... {bar} {percentage}% | ETA: {eta}s | {value}/{total}" },
+          { format: 'squeezr:: minifying... {bar} {percentage}% | ETA: {eta}s | {value}/{total}' },
           cliProgress.Presets.shades_classic
         );
 
         this.#refreshDir(_activePath);
-        fs.writeFileSync(`${_options.targetFolder}/.gitignore`, "*\n!.gitignore");
+        fs.writeFileSync(`${_options.targetFolder}/.gitignore`, '*\n!.gitignore');
 
-        const PQueue = (await import("p-queue")).default;
+        const PQueue = (await import('p-queue')).default;
         let _queue = new PQueue();
         let _doneCount = 0;
 
@@ -244,9 +251,7 @@ class Squeezr {
 
         for (let index = 0; index < _imgFiles.length; index++) {
           const _srcFilePath = _imgFiles[index];
-          const _targetFilePath = path.dirname(
-            _srcFilePath.replace(`${_options.srcFolder}/`, `${_options.targetFolder}/`)
-          );
+          const _targetFilePath = path.dirname(_srcFilePath.replace(`${_options.srcFolder}/`, `${_options.targetFolder}/`));
 
           (async () => {
             await _queue.add(() =>
@@ -269,7 +274,7 @@ class Squeezr {
                 targetFolder: _options.targetFolder,
               });
 
-              console.timeEnd("squeezr:: minify complete");
+              console.timeEnd('squeezr:: minify complete');
 
               resolve();
             }
