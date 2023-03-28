@@ -226,7 +226,7 @@ class Squeezr {
 
     return new Promise(async (resolve, reject) => {
       try {
-        const _validFileExt = ['.png', '.jpg', '.jpeg'];
+        const _validFileExt = ['.png', '.jpg', '.jpeg', '.webp', '.avif'];
         const _imgFiles = this.#getFilesByFileExt(`${_options.srcFolder}/${_options.activePath}`, _validFileExt);
 
         if (!_imgFiles.length) {
